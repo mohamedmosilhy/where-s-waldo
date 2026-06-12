@@ -32,7 +32,7 @@ const characters: SeedCharacter[] = [
 const images: SeedImage[] = [
   {
     name: "Scene 1",
-    url: "/images/scene-1.jpg",
+    url: "/images/scene-1.webp",
     characters: [
       { characterName: "Waldo", centerX: 180, centerY: 260, radius: 24 },
       { characterName: "Wizard", centerX: 520, centerY: 340, radius: 28 },
@@ -45,7 +45,7 @@ const images: SeedImage[] = [
   },
   {
     name: "Scene 2",
-    url: "/images/scene-2.jpg",
+    url: "/images/scene-2.webp",
     characters: [
       { characterName: "Waldo", centerX: 240, centerY: 410, radius: 24 },
       { characterName: "Wizard", centerX: 610, centerY: 230, radius: 28 },
