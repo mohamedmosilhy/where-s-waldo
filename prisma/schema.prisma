@@ -11,3 +11,38 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+model Image {
+  id         String           @id @default(uuid())
+  name       String           @unique
+  url        String           @unique
+  characters ImageCharacter[]
+  scores     Score[]
+}
+
+model Score {
+  id             String   @id @default(uuid())
+  playerName     String
+  completionTime Int
+  imageId        String
+  createdAt      DateTime @default(now())
+  image          Image    @relation(fields: [imageId], references: [id])
+}
+
+model Character {
+  id              String           @id @default(uuid())
+  imageCharacters ImageCharacter[]
+  name            String           @unique
+}
+
+model ImageCharacter {
+  imageId     String
+  centerX     Float
+  centerY     Float
+  radius      Float
+  image       Image     @relation(fields: [imageId], references: [id])
+  character   Character @relation(fields: [characterId], references: [id])
+  characterId String
+
+  @@id([imageId, characterId])
+}

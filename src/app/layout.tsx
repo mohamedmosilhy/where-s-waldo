@@ -8,10 +8,7 @@ export default function RootLayout({
   return (
     <html>
       <body>
-        <header>🎮 Where&apos;s Waldo?</header>
-        <nav>Home | Scenes | Leaderboard</nav>
         {children} {/* ← Pages/child layouts go here */}
-        <footer>© 2024</footer>
       </body>
     </html>
   );

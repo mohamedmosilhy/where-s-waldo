@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "seed": "pnpm dlx tsx prisma/seed.ts",
+    "studio": "pnpm exec prisma studio --browser none"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.8.0",
