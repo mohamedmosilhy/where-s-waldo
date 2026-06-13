@@ -34,9 +34,9 @@ const images: SeedImage[] = [
     name: "Scene 1",
     url: "/images/scene-1.webp",
     characters: [
-      { characterName: "Waldo", centerX: 180, centerY: 260, radius: 24 },
-      { characterName: "Wizard", centerX: 520, centerY: 340, radius: 28 },
-      { characterName: "Odlaw", centerX: 860, centerY: 190, radius: 26 },
+      { characterName: "Waldo", centerX: 0.53, centerY: 0.51, radius: 0.05 },
+      { characterName: "Wizard", centerX: 0.63, centerY: 0.51, radius: 0.05 },
+      { characterName: "Odlaw", centerX: 0.24, centerY: 0.52, radius: 0.05 },
     ],
     scores: [
       { playerName: "Alice", completionTime: 182 },
@@ -47,9 +47,7 @@ const images: SeedImage[] = [
     name: "Scene 2",
     url: "/images/scene-2.webp",
     characters: [
-      { characterName: "Waldo", centerX: 240, centerY: 410, radius: 24 },
-      { characterName: "Wizard", centerX: 610, centerY: 230, radius: 28 },
-      { characterName: "Odlaw", centerX: 940, centerY: 510, radius: 26 },
+      { characterName: "Waldo", centerX: 0.85, centerY: 0.31, radius: 0.05 },
     ],
     scores: [
       { playerName: "Alice", completionTime: 196 },

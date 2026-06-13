@@ -1,5 +1,5 @@
-import { SceneImage } from "@/src/components/SceneImage";
-import { getSceneById } from "@/src/features/scenes/actions";
+import { SceneImage } from "@/src/features/game/index";
+import { getSceneById } from "@/src/features/scenes/index";
 
 export default async function SceneDetail({
   params,

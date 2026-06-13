@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { getScenes } from "../../features/scenes/actions";
+import { getScenes } from "../../features/scenes/index";
 import Link from "next/link";
 
 export default async function ScenesList() {

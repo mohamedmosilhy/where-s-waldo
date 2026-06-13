@@ -1,12 +1,12 @@
+"use client";
+
+import { CharacterMenuProps } from "../types";
+
 export function CharacterMenu({
   characters,
   position,
   onCharacterSelect,
-}: {
-  characters: { id: string; name: string }[];
-  position: { x: number; y: number };
-  onCharacterSelect: (character: { id: string; name: string }) => void;
-}) {
+}: CharacterMenuProps) {
   return (
     <div
       className="bg-gray-100 p-4 absolute rounded shadow-lg w-64"

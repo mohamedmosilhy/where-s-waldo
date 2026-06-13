@@ -1,42 +1,67 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { CharacterMenu } from "./CharacterMenu";
-
-type SceneImageProps = {
-  scene: {
-    name: string;
-    url: string;
-    characters: {
-      character: {
-        id: string;
-        name: string;
-      };
-    }[];
-  };
-};
+import { validateCharacterSelection } from "@/src/features/game/actions";
+import { SceneImageProps } from "../types";
+import { useGameStore } from "../game-store";
 
 export function SceneImage({ scene }: SceneImageProps) {
-  const [coords, setCoords] = useState({ x: 0, y: 0 });
+  const imageWrapperRef = useRef<HTMLDivElement | null>(null);
+
   const [showMenu, setShowMenu] = useState(false);
   const [selectedCharacter, setSelectedCharacter] = useState<{
     id: string;
     name: string;
   } | null>(null);
 
-  const handleCharacterSelect = (character: { id: string; name: string }) => {
-    console.log("Character selected:", character.name);
+  const [coords, setCoords] = useState({ x: 0, y: 0 });
+  const [result, setResult] = useState<{ success?: boolean; message: string }>({
+    success: undefined,
+    message: "",
+  });
+
+  const { foundCharacters, setFoundCharacters } = useGameStore();
+
+  useEffect(() => {
+    const handleDocumentClick = (event: MouseEvent) => {
+      const target = event.target as Node | null;
+
+      if (target && imageWrapperRef.current?.contains(target)) {
+        return;
+      }
+
+      setShowMenu(false);
+    };
+
+    document.addEventListener("click", handleDocumentClick);
+
+    return () => {
+      document.removeEventListener("click", handleDocumentClick);
+    };
+  }, []);
+
+  const handleCharacterSelect = async (character: {
+    id: string;
+    name: string;
+  }) => {
+    const result = await validateCharacterSelection(
+      { x: coords.x, y: coords.y },
+      character.id,
+      scene.id,
+    );
+
+    setResult(result);
+    if (result.success) {
+      setFoundCharacters([...foundCharacters, character.id]);
+    }
     setSelectedCharacter(character);
     setShowMenu(false);
   };
 
-  const handleClick = (e: React.MouseEvent<HTMLImageElement>) => {
+  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
     const x = e.nativeEvent.offsetX / e.currentTarget.clientWidth;
     const y = e.nativeEvent.offsetY / e.currentTarget.clientHeight;
-    if (showMenu) {
-      setShowMenu(false);
-      return;
-    }
     setCoords({ x, y });
     setShowMenu(true);
   };
@@ -44,11 +69,12 @@ export function SceneImage({ scene }: SceneImageProps) {
     <>
       <p className="text-lg">{scene?.name}</p>
       <div
-        className="relative inline-block cursor-pointer select-none w-3/4"
+        ref={imageWrapperRef}
+        className="relative inline-block cursor-crosshair select-none w-3/4"
         onClick={handleClick}
       >
         <Image
-          className="mt-4border rounded border-gray-300 object-cover w-full h-auto"
+          className="border rounded border-gray-300 object-cover w-full h-auto cursor-crosshair"
           loading="eager"
           src={scene!.url}
           alt={scene!.name}
@@ -60,13 +86,16 @@ export function SceneImage({ scene }: SceneImageProps) {
           style={{
             left: `${coords.x * 100}%`,
             top: `${coords.y * 100}%`,
+            transform: "translate(-50%, -50%)",
           }}
         >
           +
         </span>
         {showMenu && (
           <CharacterMenu
-            characters={scene.characters.map((c) => c.character)}
+            characters={scene.characters
+              .map((c) => c.character)
+              .filter((c) => !foundCharacters.includes(c.id))}
             position={coords}
             onCharacterSelect={handleCharacterSelect}
           />
@@ -74,7 +103,8 @@ export function SceneImage({ scene }: SceneImageProps) {
       </div>
       <p className="mt-2 text-sm text-gray-500">
         Clicked at: {coords.x.toFixed(2)}%, {coords.y.toFixed(2)}% ,
-        characterselected: {selectedCharacter?.name || "None"}
+        characterselected: {selectedCharacter?.name || "None"} {",   "}
+        character found: {result.message}
       </p>
       <h2 className="text-xl font-semibold mt-8 mb-4">Characters</h2>
       <ul className="flex flex-wrap gap-4 p-4">
