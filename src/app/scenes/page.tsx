@@ -19,7 +19,6 @@ export default async function ScenesList() {
               className="flex flex-col items-center gap-4"
             >
               <p>{scene.name}</p>
-              <p>{scene.name}</p>
               <Image
                 loading="eager"
                 className="w-full h-auto rounded border border-gray-300 object-cover"

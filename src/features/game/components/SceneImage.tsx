@@ -77,7 +77,7 @@ export function SceneImage({ scene }: SceneImageProps) {
       const updated = [...foundCharacters, character.id];
       setFoundCharacters(updated);
       if (updated.length === scene.characters.length) {
-        console.log("Congratulations! You found all characters!");
+        
         const completionTime =
           (Date.now() - useGameStore.getState().startTimeOfScene) / 1000;
         alert(
