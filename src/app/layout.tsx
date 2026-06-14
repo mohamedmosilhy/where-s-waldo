@@ -18,6 +18,9 @@ export const metadata: Metadata = {
   title: "Where's Waldo? | Find the Hidden Characters",
   description:
     "The classic search game — find hidden characters in detailed illustrated scenes!",
+  icons: {
+    icon: "/favicon.svg",
+  },
 };
 
 export default function RootLayout({
@@ -51,13 +54,22 @@ export default function RootLayout({
             >
               WHERE&apos;S WALDO?
             </Link>
-            <Link
-              href="/scenes"
-              className="text-sm font-medium px-3 py-1.5 rounded-lg transition-colors"
-              style={{ color: "#9ca3af" }}
-            >
-              All Scenes
-            </Link>
+            <div className="flex items-center gap-1">
+              <Link
+                href="/scenes"
+                className="text-sm font-medium px-3 py-1.5 rounded-lg transition-colors"
+                style={{ color: "#9ca3af" }}
+              >
+                Scenes
+              </Link>
+              <Link
+                href="/calibration"
+                className="text-xs font-medium px-2.5 py-1 rounded-lg transition-colors"
+                style={{ backgroundColor: "rgba(234,179,8,0.1)", color: "#ca8a04", border: "1px solid rgba(234,179,8,0.2)" }}
+              >
+                Dev
+              </Link>
+            </div>
           </div>
         </nav>
         {children}

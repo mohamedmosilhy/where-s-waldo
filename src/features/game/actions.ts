@@ -3,59 +3,37 @@
 import { prisma } from "../../lib/prisma";
 
 export async function validateCharacterSelection(
-  pos: {
-    x: number;
-    y: number;
-  },
+  pos: { x: number; y: number },
   characterId: string,
   imageId: string,
 ) {
   try {
     const { x, y } = pos;
-    const image = await prisma.image.findUnique({
-      include: {
-        characters: {
-          include: {
-            character: true,
-          },
-        },
-      },
+
+    // Targeted lookup — no full scene join needed
+    const imageCharacter = await prisma.imageCharacter.findUnique({
       where: {
-        id: imageId,
+        imageId_characterId: { imageId, characterId },
       },
+      include: { character: { select: { name: true } } },
     });
 
-    const character = image?.characters.find(
-      (c) => c.character.id === characterId,
-    );
-    if (!character) {
-      throw new Error("Character not found in this image");
+    if (!imageCharacter) {
+      return { success: false, message: "Character not found in this scene." };
     }
 
-    const { centerX, centerY, radius } = character;
+    const { centerX, centerY, radius, character } = imageCharacter;
 
-    if (
-      x >= centerX - radius &&
-      x <= centerX + radius &&
-      y >= centerY - radius &&
-      y <= centerY + radius
-    ) {
-      return {
-        success: true,
-        message: `Character ${character.character.name} found!`,
-      };
+    // Circular distance check (radius is in normalized 0-1 space)
+    const dist = Math.sqrt((x - centerX) ** 2 + (y - centerY) ** 2);
+    if (dist <= radius) {
+      return { success: true, message: `Found ${character.name}!` };
     }
 
-    return {
-      success: false,
-      message: `Character ${character.character.name} not found at this location.`,
-    };
+    return { success: false, message: `Not ${character.name} — keep looking!` };
   } catch (error) {
     console.error("Error validating character selection:", error);
-    return {
-      success: false,
-      message: "Failed to validate character selection",
-    };
+    return { success: false, message: "Validation failed. Try again." };
   }
 }
 
@@ -65,11 +43,8 @@ export async function setScore(scoreData: {
   imageId: string;
 }) {
   try {
-    const data = await prisma.score.create({
-      data: scoreData,
-    });
-    return data;
+    return await prisma.score.create({ data: scoreData });
   } catch (error) {
-    throw new Error(`The data provided is not correct,${error}`);
+    throw new Error(`Failed to save score: ${error}`);
   }
 }

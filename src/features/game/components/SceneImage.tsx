@@ -10,6 +10,7 @@ import {
 import { SceneImageProps } from "../types";
 import { useRouter } from "next/navigation";
 import { useGameStore } from "../game-store";
+import { getCharacterConfig } from "../character-config";
 
 function formatTime(ms: number) {
   const secs = ms / 1000;
@@ -140,21 +141,18 @@ export function SceneImage({ scene }: SceneImageProps) {
 
       {/* HUD bar */}
       <div
-        className="flex items-center justify-between rounded-xl px-4 py-3 mb-4"
-        style={{
-          backgroundColor: "#111827",
-          border: "1px solid #1f2937",
-        }}
+        className="flex items-center justify-between rounded-xl px-3 sm:px-4 py-2.5 mb-4 gap-2"
+        style={{ backgroundColor: "#111827", border: "1px solid #1f2937" }}
       >
-        <h1 className="font-bangers text-xl text-white tracking-wide">
+        <h1 className="font-bangers text-lg sm:text-xl text-white tracking-wide truncate min-w-0">
           {scene.name}
         </h1>
 
-        <div className="flex items-center gap-4">
-          {/* Progress bar */}
-          <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 sm:gap-4 shrink-0">
+          {/* Progress */}
+          <div className="flex items-center gap-1.5">
             <div
-              className="h-1.5 w-20 rounded-full overflow-hidden"
+              className="h-1.5 w-14 sm:w-20 rounded-full overflow-hidden"
               style={{ backgroundColor: "#1f2937" }}
             >
               <div
@@ -165,22 +163,18 @@ export function SceneImage({ scene }: SceneImageProps) {
                 }}
               />
             </div>
-            <span
-              className="text-xs font-mono"
-              style={{ color: "#9ca3af" }}
-            >
+            <span className="text-xs font-mono" style={{ color: "#9ca3af" }}>
               {progress}/{total}
             </span>
           </div>
 
           {/* Timer */}
           <div
-            className="flex items-center gap-1.5 px-3 py-1 rounded-lg"
+            className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 rounded-lg"
             style={{ backgroundColor: "#1f2937" }}
           >
-            {/* Clock icon */}
             <svg
-              className="w-3.5 h-3.5"
+              className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -192,8 +186,8 @@ export function SceneImage({ scene }: SceneImageProps) {
               <path strokeLinecap="round" d="M12 7v5l3 1.5" />
             </svg>
             <span
-              className="font-mono text-sm font-semibold"
-              style={{ color: "#fbbf24", minWidth: "3.5rem" }}
+              className="font-mono text-xs sm:text-sm font-semibold"
+              style={{ color: "#fbbf24", minWidth: "3rem" }}
             >
               {formatTime(timer)}
             </span>
@@ -202,13 +196,13 @@ export function SceneImage({ scene }: SceneImageProps) {
       </div>
 
       {/* Main game layout */}
-      <div className="flex gap-4 items-start">
+      <div className="flex flex-col lg:flex-row gap-4 items-start">
         {/* Game image column */}
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 w-full">
           {/* Notification toast */}
           {notification && (
             <div
-              key={notification.text + Date.now()}
+              key={notification.text}
               className="mb-2 px-4 py-2 rounded-lg text-sm font-medium text-center animate-slide-up"
               style={{
                 backgroundColor: notification.success
@@ -310,14 +304,85 @@ export function SceneImage({ scene }: SceneImageProps) {
           </div>
         </div>
 
-        {/* Character sidebar */}
-        <div className="w-52 flex-shrink-0">
+        {/* Character sidebar — horizontal strip on mobile, vertical on desktop */}
+        <div className="w-full lg:w-52 lg:shrink-0">
+          {/* Mobile: horizontal scrollable avatar strip */}
           <div
-            className="rounded-xl p-4"
-            style={{
-              backgroundColor: "#111827",
-              border: "1px solid #1f2937",
-            }}
+            className="lg:hidden rounded-xl px-3 py-2"
+            style={{ backgroundColor: "#111827", border: "1px solid #1f2937" }}
+          >
+            <p
+              className="text-xs font-semibold uppercase tracking-wider mb-2"
+              style={{ color: "#6b7280" }}
+            >
+              Find These
+            </p>
+            <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
+              {scene.characters.map((ic) => {
+                const found = foundCharacters.includes(ic.character.id);
+                const cfg = getCharacterConfig(ic.character.name);
+                return (
+                  <div
+                    key={ic.character.id}
+                    className="flex flex-col items-center gap-1 shrink-0 transition-all duration-300"
+                    style={{ opacity: found ? 0.55 : 1 }}
+                  >
+                    <div
+                      className="w-12 h-12 rounded-full relative overflow-hidden"
+                      style={{
+                        backgroundColor: cfg.bgColor,
+                        filter: found ? "grayscale(0.5)" : "none",
+                        border: found
+                          ? "2px solid #10b981"
+                          : "2px solid transparent",
+                      }}
+                    >
+                      {cfg.imageUrl && (
+                        <Image
+                          src={cfg.imageUrl}
+                          alt={ic.character.name}
+                          width={48}
+                          height={48}
+                          className="w-full h-full object-cover"
+                        />
+                      )}
+                      {found && (
+                        <div
+                          className="absolute inset-0 flex items-center justify-center rounded-full"
+                          style={{ backgroundColor: "rgba(16,185,129,0.45)" }}
+                        >
+                          <svg
+                            className="w-5 h-5"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                            style={{ color: "#fff" }}
+                            aria-hidden="true"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        </div>
+                      )}
+                    </div>
+                    <span
+                      className="text-xs font-medium"
+                      style={{ color: found ? "#34d399" : "#9ca3af" }}
+                    >
+                      {ic.character.name}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Desktop: vertical list */}
+          <div
+            className="hidden lg:block rounded-xl p-4"
+            style={{ backgroundColor: "#111827", border: "1px solid #1f2937" }}
           >
             <h3
               className="text-xs font-semibold uppercase tracking-wider mb-3"
@@ -325,54 +390,75 @@ export function SceneImage({ scene }: SceneImageProps) {
             >
               Find These
             </h3>
-            <ul className="space-y-1.5">
+            <ul className="space-y-2">
               {scene.characters.map((ic) => {
                 const found = foundCharacters.includes(ic.character.id);
+                const cfg = getCharacterConfig(ic.character.name);
                 return (
                   <li
                     key={ic.character.id}
-                    className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all duration-300"
+                    className="flex items-center gap-3 p-2 rounded-lg transition-all duration-300"
                     style={{
                       backgroundColor: found
                         ? "rgba(16,185,129,0.08)"
                         : "rgba(31,41,55,0.5)",
-                      border: `1px solid ${
-                        found ? "rgba(16,185,129,0.25)" : "transparent"
-                      }`,
-                      color: found ? "#34d399" : "#d1d5db",
+                      border: `1px solid ${found ? "rgba(16,185,129,0.25)" : "transparent"}`,
+                      opacity: found ? 0.7 : 1,
                     }}
                   >
-                    {/* Status dot */}
                     <div
-                      className="w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0 transition-colors duration-300"
+                      className="w-9 h-9 rounded-full shrink-0 relative overflow-hidden"
                       style={{
-                        backgroundColor: found ? "#10b981" : "transparent",
-                        border: `1px solid ${found ? "#10b981" : "#4b5563"}`,
+                        backgroundColor: cfg.bgColor,
+                        filter: found ? "grayscale(0.5)" : "none",
                       }}
                     >
+                      {cfg.imageUrl && (
+                        <Image
+                          src={cfg.imageUrl}
+                          alt={ic.character.name}
+                          width={36}
+                          height={36}
+                          className="w-full h-full object-cover"
+                        />
+                      )}
                       {found && (
-                        <svg
-                          className="w-2.5 h-2.5 text-white"
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
-                          aria-hidden="true"
+                        <div
+                          className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full flex items-center justify-center"
+                          style={{
+                            backgroundColor: "#10b981",
+                            border: "2px solid #030712",
+                          }}
                         >
-                          <path
-                            fillRule="evenodd"
-                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
+                          <svg
+                            className="w-2 h-2 text-white"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                            aria-hidden="true"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        </div>
                       )}
                     </div>
-                    <span
-                      style={{
-                        textDecoration: found ? "line-through" : "none",
-                        opacity: found ? 0.6 : 1,
-                      }}
-                    >
-                      {ic.character.name}
-                    </span>
+                    <div>
+                      <p
+                        className="text-sm font-medium leading-tight"
+                        style={{
+                          color: found ? "#34d399" : "#e5e7eb",
+                          textDecoration: found ? "line-through" : "none",
+                        }}
+                      >
+                        {ic.character.name}
+                      </p>
+                      <p className="text-xs" style={{ color: "#6b7280" }}>
+                        {found ? "Found!" : "Still hiding…"}
+                      </p>
+                    </div>
                   </li>
                 );
               })}
