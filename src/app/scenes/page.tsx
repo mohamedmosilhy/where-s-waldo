@@ -4,7 +4,6 @@ import Link from "next/link";
 
 export default async function ScenesList() {
   const scenes = await getScenes();
-  console.log("scenes", scenes);
 
   return (
     <div>
@@ -19,6 +18,7 @@ export default async function ScenesList() {
               href={`/scenes/${scene.id}`}
               className="flex flex-col items-center gap-4"
             >
+              <p>{scene.name}</p>
               <p>{scene.name}</p>
               <Image
                 loading="eager"

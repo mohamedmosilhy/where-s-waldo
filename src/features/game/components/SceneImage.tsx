@@ -2,14 +2,27 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { CharacterMenu } from "./CharacterMenu";
-import { validateCharacterSelection } from "@/src/features/game/actions";
+import {
+  validateCharacterSelection,
+  setScore,
+} from "@/src/features/game/actions";
 import { SceneImageProps } from "../types";
+import { useRouter } from "next/navigation";
 import { useGameStore } from "../game-store";
 
 export function SceneImage({ scene }: SceneImageProps) {
   const imageWrapperRef = useRef<HTMLDivElement | null>(null);
 
+  const router = useRouter();
+
+  const setStartTimeOfScene = useGameStore(
+    (state) => state.setStartTimeOfScene,
+  );
+
+  const setPlayerName = useGameStore((state) => state.setPlayerName);
+
   const [showMenu, setShowMenu] = useState(false);
+  const [timer, setTimer] = useState(0);
   const [selectedCharacter, setSelectedCharacter] = useState<{
     id: string;
     name: string;
@@ -21,7 +34,7 @@ export function SceneImage({ scene }: SceneImageProps) {
     message: "",
   });
 
-  const { foundCharacters, setFoundCharacters } = useGameStore();
+  const [foundCharacters, setFoundCharacters] = useState<string[]>([]);
 
   useEffect(() => {
     const handleDocumentClick = (event: MouseEvent) => {
@@ -36,10 +49,17 @@ export function SceneImage({ scene }: SceneImageProps) {
 
     document.addEventListener("click", handleDocumentClick);
 
+    setStartTimeOfScene(Date.now());
+
+    const timerinterval = setInterval(() => {
+      setTimer(Date.now() - useGameStore.getState().startTimeOfScene);
+    }, 100);
+
     return () => {
       document.removeEventListener("click", handleDocumentClick);
+      clearInterval(timerinterval);
     };
-  }, []);
+  }, [setStartTimeOfScene]);
 
   const handleCharacterSelect = async (character: {
     id: string;
@@ -52,9 +72,42 @@ export function SceneImage({ scene }: SceneImageProps) {
     );
 
     setResult(result);
+
     if (result.success) {
-      setFoundCharacters([...foundCharacters, character.id]);
+      const updated = [...foundCharacters, character.id];
+      setFoundCharacters(updated);
+      if (updated.length === scene.characters.length) {
+        console.log("Congratulations! You found all characters!");
+        const completionTime =
+          (Date.now() - useGameStore.getState().startTimeOfScene) / 1000;
+        alert(
+          `Congratulations! You found all characters! in  ${completionTime.toFixed(2)} seconds!`,
+        );
+
+        let playerName: string = "";
+        if (useGameStore.getState().playerName === "") {
+          playerName = prompt("enter your name please?") ?? "";
+          if (playerName) {
+            setScore({
+              playerName,
+              completionTime: completionTime * 1000,
+              imageId: scene.id,
+            });
+
+            setPlayerName(playerName);
+          }
+        } else {
+          setScore({
+            playerName,
+            completionTime: completionTime * 1000,
+            imageId: scene.id,
+          });
+        }
+
+        router.push("/scenes");
+      }
     }
+
     setSelectedCharacter(character);
     setShowMenu(false);
   };
@@ -105,6 +158,10 @@ export function SceneImage({ scene }: SceneImageProps) {
         Clicked at: {coords.x.toFixed(2)}%, {coords.y.toFixed(2)}% ,
         characterselected: {selectedCharacter?.name || "None"} {",   "}
         character found: {result.message}
+        time: {(timer / 1000).toFixed(2)} seconds
+      </p>
+      <p className="mt-2 text-sm text-gray-500">
+        Found {foundCharacters.length} of {scene?.characters.length} characters
       </p>
       <h2 className="text-xl font-semibold mt-8 mb-4">Characters</h2>
       <ul className="flex flex-wrap gap-4 p-4">
