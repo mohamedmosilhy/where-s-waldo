@@ -4,13 +4,6 @@ export default function ScenesLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <div className="scenes-container">
-      <aside className="sidebar">
-        {/* Sidebar stays on ALL scenes pages */}
-      </aside>
-      <main>
-        {children} {/* ← Scenes list OR detail page */}
-      </main>
-    </div>
+    <div style={{ minHeight: "calc(100vh - 3.5rem)" }}>{children}</div>
   );
 }

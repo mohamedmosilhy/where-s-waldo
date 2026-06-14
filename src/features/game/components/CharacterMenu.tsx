@@ -7,28 +7,72 @@ export function CharacterMenu({
   position,
   onCharacterSelect,
 }: CharacterMenuProps) {
+  // Keep the menu inside the image by capping position
+  const leftPct = Math.min(position.x * 100 + 1, 58);
+  const topPct = Math.min(position.y * 100 + 3, 65);
+
   return (
     <div
-      className="bg-gray-100 p-4 absolute rounded shadow-lg w-64"
-      onClick={(event) => event.stopPropagation()}
+      className="absolute z-20 animate-slide-up"
+      onClick={(e) => e.stopPropagation()}
       style={{
-        left: `${(position.x + 0.01) * 100}%`,
-        top: `${(position.y + 0.05) * 100}%`,
+        left: `${leftPct}%`,
+        top: `${topPct}%`,
       }}
     >
-      <h2 className="font-semibold">Characters</h2>
-      <ul className="flex flex-wrap gap-4 p-4">
-        {characters.map((character) => (
-          <li
-            className="border rounded border-gray-300 p-4 w-full text-center"
-            key={character.id}
+      <div
+        className="rounded-xl shadow-2xl overflow-hidden w-44"
+        style={{
+          backgroundColor: "rgba(17,24,39,0.97)",
+          border: "1px solid #374151",
+          backdropFilter: "blur(8px)",
+          boxShadow:
+            "0 20px 40px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04)",
+        }}
+      >
+        <div
+          className="px-3 py-2"
+          style={{ borderBottom: "1px solid #1f2937" }}
+        >
+          <p
+            className="text-xs font-semibold uppercase tracking-wider"
+            style={{ color: "#6b7280", letterSpacing: "0.1em" }}
           >
-            <button onClick={() => onCharacterSelect(character)}>
-              {character.name}
-            </button>
-          </li>
-        ))}
-      </ul>
+            Who did you find?
+          </p>
+        </div>
+        <ul className="p-1.5 space-y-0.5">
+          {characters.length === 0 ? (
+            <li className="px-3 py-2 text-xs" style={{ color: "#6b7280" }}>
+              All found!
+            </li>
+          ) : (
+            characters.map((character) => (
+              <li key={character.id}>
+                <button
+                  onClick={() => onCharacterSelect(character)}
+                  className="w-full text-left px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-100"
+                  style={{ color: "#e5e7eb" }}
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLButtonElement).style.backgroundColor =
+                      "#dc2626";
+                    (e.currentTarget as HTMLButtonElement).style.color =
+                      "#ffffff";
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLButtonElement).style.backgroundColor =
+                      "transparent";
+                    (e.currentTarget as HTMLButtonElement).style.color =
+                      "#e5e7eb";
+                  }}
+                >
+                  {character.name}
+                </button>
+              </li>
+            ))
+          )}
+        </ul>
+      </div>
     </div>
   );
 }
