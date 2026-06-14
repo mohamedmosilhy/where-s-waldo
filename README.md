@@ -1,279 +1,421 @@
-# Where's Waldo?
+# Where's Waldo? 🎯
 
-A full-stack, interactive hidden-character search game built with Next.js App Router. Players scan detailed illustrated scenes, click where they think a character is hiding, and race against a live timer to find all characters. Scores are saved to a global leaderboard per scene.
+A full-stack photo tagging game built with Next.js, Prisma, PostgreSQL, and TypeScript.
 
-<!-- Add screenshots to docs/screenshots/ then uncomment:
-![Home page](docs/screenshots/home.png)
-![Game page](docs/screenshots/game.png)
-![Leaderboard](docs/screenshots/leaderboard.png)
--->
+Players must find hidden characters within large scenes by clicking on the image and selecting the character they believe they found. The game validates selections on the server, tracks completion times, and displays scene-specific leaderboards.
 
 ---
 
-## Features
+## Live Demo
 
-- **Live timer** — millisecond-precision stopwatch that starts on page load
-- **Circular hit detection** — clicks are validated against a configurable center + radius per character, not a rough bounding box
-- **Per-scene leaderboards** — fastest completion times ranked in real time
-- **Mobile-first responsive layout** — full-width image on small screens with a scrollable character strip; bottom-sheet character menu on tap; side-by-side layout on desktop
-- **Completion modal** — prompts for a display name before submitting the score
-- **Calibration tool** (`/calibration`) — dev-only page for generating `centerX / centerY / radius` seed values by clicking on a local image upload
-
----
-
-## Tech Stack
-
-| Layer | Technology |
-|---|---|
-| Framework | [Next.js 16](https://nextjs.org) — App Router, Server Components, Server Actions |
-| Language | TypeScript 5 |
-| UI | React 19 |
-| Styling | [Tailwind CSS 4](https://tailwindcss.com) — zero-config, `@theme` directive |
-| State management | [Zustand 5](https://zustand-demo.pmnd.rs) |
-| ORM | [Prisma 7](https://www.prisma.io) |
-| Database | PostgreSQL |
-| Fonts | Google Fonts — Bangers + Inter via `next/font/google` |
-| Package manager | [pnpm](https://pnpm.io) |
-| Deployment | [Vercel](https://vercel.com) |
-
----
-
-## Project Structure
-
-```
-src/
-├── app/
-│   ├── page.tsx                   # Home — hero, characters, how-to-play
-│   ├── scenes/
-│   │   ├── page.tsx               # Scene selection grid
-│   │   └── [id]/page.tsx          # Active game page
-│   └── calibration/page.tsx       # Dev tool for coordinate generation
-├── features/
-│   ├── game/
-│   │   ├── actions.ts             # Server Actions (validate click, save score)
-│   │   ├── character-config.ts    # Single source of truth for character metadata
-│   │   ├── game-store.ts          # Zustand store (timer, player name)
-│   │   └── components/
-│   │       ├── SceneImage.tsx     # Main interactive game component
-│   │       ├── CharacterMenu.tsx  # Click popup / mobile bottom sheet
-│   │       └── CompletionModal.tsx
-│   ├── leaderboard/
-│   │   └── components/LeaderBoard.tsx
-│   ├── scenes/
-│   │   └── actions.ts             # getSceneById, getAllScenes
-│   └── calibration/
-│       └── components/            # CalibrationImage, CharacterForm, ExportPanel
-prisma/
-├── schema.prisma
-├── seed.ts
-└── migrations/
-public/
-└── images/
-    ├── characters/                # waldo.webp  wizard.webp  odlaw.webp  wenda.webp
-    ├── scene-1.webp
-    └── scene-2.webp
-```
-
----
-
-## Getting Started
-
-### Prerequisites
-
-- Node.js 20+
-- pnpm — `npm install -g pnpm`
-- A running PostgreSQL instance
-
-### 1. Clone and install
-
-```bash
-git clone https://github.com/<your-username>/where-s-waldo.git
-cd where-s-waldo
-pnpm install
-```
-
-### 2. Set environment variables
-
-```bash
-cp .env.example .env   # then fill in your DATABASE_URL
-```
-
-See [Environment Variables](#environment-variables) for the full list.
-
-### 3. Run database migrations
-
-```bash
-pnpm exec prisma migrate dev
-```
-
-### 4. Seed the database
-
-```bash
-pnpm seed
-```
-
-### 5. Start the dev server
-
-```bash
-pnpm dev
-```
-
-Open [http://localhost:3000](http://localhost:3000).
-
----
-
-## Environment Variables
-
-Create a `.env` file at the project root:
-
-```env
-# PostgreSQL connection string
-# postgresql://USER:PASSWORD@HOST:PORT/DATABASE
-DATABASE_URL="postgresql://postgres:password@localhost:5432/whereswaldo"
-```
-
-> **Prisma reads `DATABASE_URL` directly.** No additional runtime config is required.
-
-For production, add the same variable in **Vercel → Project Settings → Environment Variables**.
-
----
-
-## Database Commands
-
-| Command | Description |
-|---|---|
-| `pnpm exec prisma migrate dev` | Apply pending migrations (development) |
-| `pnpm exec prisma migrate deploy` | Apply migrations in production (no prompts) |
-| `pnpm exec prisma migrate reset` | Drop DB → reapply all migrations → re-seed |
-| `pnpm exec prisma db push` | Push schema changes without generating a migration file |
-| `pnpm exec prisma generate` | Regenerate the Prisma Client after schema changes |
-| `pnpm studio` | Open Prisma Studio in the browser |
-
----
-
-## Seed Command
-
-```bash
-pnpm seed
-```
-
-The seed script (`prisma/seed.ts`) inserts:
-
-- Scene images with their public URLs
-- Characters (Waldo, Wizard, Odlaw, Wenda)
-- Per-scene hit-box coordinates (`centerX`, `centerY`, `radius`) for each character
-- A handful of sample leaderboard scores
-
-> `prisma migrate reset` automatically runs the seed after wiping the database.
-
-To add new scenes or adjust character positions, edit `prisma/seed.ts`. Use the **Calibration Tool** at `/calibration` to visually generate accurate coordinate values from your images first.
-
----
-
-## Calibration Tool
-
-The `/calibration` route is a developer utility for generating character hit-box seed values.
-
-1. Go to `/calibration`
-2. Upload any scene image
-3. Click on a character's face — a crosshair + adjustable radius circle appear
-4. Set the character name and fine-tune the radius with the slider
-5. Click **Save** — the entry appears in the export panel with a one-click copy button
-6. Paste the generated TypeScript into `prisma/seed.ts`
-
----
-
-## Scripts
-
-| Script | Description |
-|---|---|
-| `pnpm dev` | Start Next.js development server with HMR |
-| `pnpm build` | Create an optimised production build |
-| `pnpm start` | Serve the production build locally |
-| `pnpm lint` | Run ESLint |
-| `pnpm seed` | Seed the database |
-| `pnpm studio` | Launch Prisma Studio |
-
----
-
-## Deployment
-
-**Live URL:** *(add your Vercel URL here)*
-
-### Deploy to Vercel
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/<your-username>/where-s-waldo)
-
-1. Connect your GitHub repo in the Vercel dashboard
-2. Add `DATABASE_URL` in **Project Settings → Environment Variables**
-3. Add a build command that runs migrations:
-   ```
-   pnpm exec prisma migrate deploy && pnpm build
-   ```
-4. Every push to `main` triggers an automatic redeploy
-
----
-
-## Database Schema
-
-```prisma
-model Image {
-  id         String           @id @default(uuid())
-  name       String           @unique
-  url        String           @unique
-  characters ImageCharacter[]
-  scores     Score[]
-}
-
-model Character {
-  id              String           @id @default(uuid())
-  name            String           @unique
-  imageCharacters ImageCharacter[]
-}
-
-// Hit-box per character per scene
-model ImageCharacter {
-  imageId     String
-  characterId String
-  centerX     Float     // normalised 0–1 (fraction of image width)
-  centerY     Float     // normalised 0–1 (fraction of image height)
-  radius      Float     // normalised — used in circular hit detection
-  image       Image     @relation(fields: [imageId], references: [id])
-  character   Character @relation(fields: [characterId], references: [id])
-
-  @@id([imageId, characterId])
-}
-
-model Score {
-  id             String   @id @default(uuid())
-  playerName     String
-  completionTime Int      // milliseconds
-  imageId        String
-  createdAt      DateTime @default(now())
-  image          Image    @relation(fields: [imageId], references: [id])
-}
-```
-
-**Hit detection formula:**
-
-```
-√( (clickX − centerX)² + (clickY − centerY)² ) ≤ radius
-```
-
-All coordinates are normalised fractions (0–1) of the image dimensions, so hit-boxes remain accurate regardless of display size.
+https://where-s-waldo-pj64-7lvx6hbb5-mohamedmosilhys-projects.vercel.app/
 
 ---
 
 ## Screenshots
 
-> To add screenshots: take them, save to `docs/screenshots/`, then uncomment the images at the top of this file.
+### Home Page
 
-| Home | Game | Leaderboard |
-|---|---|---|
-| *(add screenshot)* | *(add screenshot)* | *(add screenshot)* |
+![Home Page](./public/screenshots/home.png)
+
+### Scene Selection
+
+![Scenes](./public/screenshots/scenesSelection.png)
+
+### Gameplay
+
+![Gameplay](./public/screenshots/game1.png)
+![Gameplay](./public/screenshots/game2.png)
+![Gameplay](./public/screenshots/game3.png)
+
+### Leaderboard
+
+![Leaderboard](./public/screenshots/leaderboard.png)
 
 ---
 
-## License
+# Features
 
-MIT
+## Gameplay
+
+- Multiple scenes to play
+- Hidden characters in each scene
+- Click-to-target interaction
+- Character selection menu
+- Real-time validation
+- Scene completion tracking
+- Completion timer
+
+## Leaderboards
+
+- Scene-specific leaderboard
+- Fastest completion times displayed
+- Player name support
+- Automatic score recording
+
+## Responsive Design
+
+- Desktop support
+- Tablet support
+- Mobile support
+
+## Security
+
+Character coordinates are never exposed to the client.
+
+Validation is performed entirely on the server.
+
+The client only receives:
+
+- Scene data
+- Character names
+- Character ids
+
+Hidden validation data remains protected in the database.
+
+---
+
+# Tech Stack
+
+## Frontend
+
+- Next.js App Router
+- React
+- TypeScript
+- Tailwind CSS
+- Zustand
+
+## Backend
+
+- Next.js Server Actions
+- Prisma ORM
+
+## Database
+
+- PostgreSQL
+
+## Deployment
+
+- Vercel
+
+---
+
+# Architecture
+
+The application follows a feature-based architecture.
+
+```text
+src/
+├── app/
+├── components/
+├── features/
+│   ├── game/
+│   ├── leaderboard/
+│   ├── player/
+│   └── scenes/
+├── lib/
+├── store/
+└── types/
+```
+
+Each feature owns its own:
+
+- Components
+- Actions
+- Types
+- State
+- Business logic
+
+This keeps responsibilities separated and makes the application easier to scale.
+
+---
+
+# Database Design
+
+## Image
+
+Represents a playable scene.
+
+```text
+Image
+├── id
+├── name
+└── url
+```
+
+---
+
+## Character
+
+Represents a hidden character.
+
+```text
+Character
+├── id
+└── name
+```
+
+---
+
+## ImageCharacter
+
+Join table containing validation coordinates.
+
+```text
+ImageCharacter
+├── imageId
+├── characterId
+├── centerX
+├── centerY
+└── radius
+```
+
+Coordinates are stored as normalized values between:
+
+```text
+0 → 1
+```
+
+This allows validation to work correctly across different screen sizes.
+
+---
+
+## Score
+
+Stores completed runs.
+
+```text
+Score
+├── playerName
+├── completionTime
+├── imageId
+└── createdAt
+```
+
+---
+
+# Coordinate Normalization
+
+A major challenge in this project was supporting multiple screen sizes.
+
+Instead of storing pixel coordinates:
+
+```text
+x = 842
+y = 416
+```
+
+the application stores normalized coordinates:
+
+```text
+x = 0.421
+y = 0.208
+```
+
+Calculated using:
+
+```ts
+normalizedX = clickX / imageWidth;
+normalizedY = clickY / imageHeight;
+```
+
+This guarantees consistent validation regardless of screen size.
+
+---
+
+# Validation System
+
+When a player selects a character:
+
+1. Frontend sends:
+   - imageId
+   - characterId
+   - normalized x
+   - normalized y
+
+2. Server retrieves:
+   - centerX
+   - centerY
+   - radius
+
+3. Validation checks whether the click falls inside the character's bounding area.
+
+4. Server returns:
+
+```json
+{
+  "success": true
+}
+```
+
+or
+
+```json
+{
+  "success": false
+}
+```
+
+No secret coordinates are ever sent to the client.
+
+---
+
+# State Management
+
+Global state is managed with Zustand.
+
+Examples:
+
+```text
+playerName
+gameCompleted
+```
+
+Local UI state remains local using React state.
+
+Examples:
+
+```text
+menuOpen
+selectedCharacter
+clickedPosition
+foundCharacters
+```
+
+This prevents unnecessary global state.
+
+---
+
+# Local Development
+
+## Clone Repository
+
+```bash
+git clone <repository-url>
+cd where-s-waldo
+```
+
+---
+
+## Install Dependencies
+
+```bash
+pnpm install
+```
+
+---
+
+## Environment Variables
+
+Create a `.env` file:
+
+```env
+DATABASE_URL="your_database_url"
+```
+
+---
+
+## Run Migrations
+
+```bash
+npx prisma migrate dev
+```
+
+---
+
+## Seed Database
+
+```bash
+pnpm prisma db seed
+```
+
+---
+
+## Start Development Server
+
+```bash
+pnpm dev
+```
+
+Application:
+
+```text
+http://localhost:3000
+```
+
+---
+
+# Production Deployment
+
+The project is deployed on Vercel.
+
+Build process:
+
+```bash
+prisma generate
+next build
+```
+
+Database:
+
+```text
+PostgreSQL
+```
+
+Hosting:
+
+```text
+Vercel
+```
+
+---
+
+# Lessons Learned
+
+This project involved several interesting engineering challenges:
+
+- Feature-based architecture
+- Prisma relationship modeling
+- Coordinate normalization
+- Secure server-side validation
+- State ownership decisions
+- Timer implementation
+- Leaderboard design
+- Full-stack deployment
+
+The biggest architectural lesson was separating:
+
+```text
+UI State
+```
+
+from
+
+```text
+Application State
+```
+
+and ensuring sensitive game logic remained on the server.
+
+---
+
+# Future Improvements
+
+Potential enhancements:
+
+- Found-character markers on images
+- Toast notifications
+- User accounts
+- Global leaderboard
+- Achievement system
+- Scene categories
+- Admin scene creation dashboard
+- Image upload and automatic calibration tools
+
+---
+
+# Author
+
+Mohamed Mosilhy
+
+Built as part of The Odin Project curriculum.
