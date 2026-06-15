@@ -26,6 +26,7 @@ type SeedImage = {
 const characters: SeedCharacter[] = [
   { name: "Waldo" },
   { name: "Wizard" },
+  { name: "Wenda" },
   { name: "Odlaw" },
 ];
 
@@ -52,9 +53,30 @@ const images: SeedImage[] = [
     name: "Scene 3",
     url: "/images/scene-3.webp",
     characters: [
-      { characterName: "Waldo", centerX: 0.5, centerY: 0.5, radius: 0.05 },
-      { characterName: "Wizard", centerX: 0.5, centerY: 0.5, radius: 0.05 },
-      { characterName: "Odlaw", centerX: 0.5, centerY: 0.5, radius: 0.05 },
+      {
+        characterName: "Wizard",
+        centerX: 0.2955,
+        centerY: 0.4066,
+        radius: 0.025,
+      },
+      {
+        characterName: "Waldo",
+        centerX: 0.9611,
+        centerY: 0.0636,
+        radius: 0.025,
+      },
+      {
+        characterName: "Wenda",
+        centerX: 0.2818,
+        centerY: 0.6636,
+        radius: 0.01,
+      },
+      {
+        characterName: "Odlaw",
+        centerX: 0.9187,
+        centerY: 0.5776,
+        radius: 0.025,
+      },
     ],
     scores: [],
   },
@@ -62,9 +84,24 @@ const images: SeedImage[] = [
     name: "Scene 4",
     url: "/images/scene-4.webp",
     characters: [
-      { characterName: "Waldo", centerX: 0.5, centerY: 0.5, radius: 0.05 },
-      { characterName: "Wizard", centerX: 0.5, centerY: 0.5, radius: 0.05 },
-      { characterName: "Odlaw", centerX: 0.5, centerY: 0.5, radius: 0.05 },
+      {
+        characterName: "Odlaw",
+        centerX: 0.0504,
+        centerY: 0.763,
+        radius: 0.02,
+      },
+      {
+        characterName: "Wenda",
+        centerX: 0.8832,
+        centerY: 0.2902,
+        radius: 0.02,
+      },
+      {
+        characterName: "Waldo",
+        centerX: 0.8018,
+        centerY: 0.0983,
+        radius: 0.02,
+      },
     ],
     scores: [],
   },
@@ -72,9 +109,30 @@ const images: SeedImage[] = [
     name: "Scene 5",
     url: "/images/scene-5.webp",
     characters: [
-      { characterName: "Waldo", centerX: 0.5, centerY: 0.5, radius: 0.05 },
-      { characterName: "Wizard", centerX: 0.5, centerY: 0.5, radius: 0.05 },
-      { characterName: "Odlaw", centerX: 0.5, centerY: 0.5, radius: 0.05 },
+      {
+        characterName: "Waldo",
+        centerX: 0.5899,
+        centerY: 0.1132,
+        radius: 0.02,
+      },
+      {
+        characterName: "Odlaw",
+        centerX: 0.3139,
+        centerY: 0.6478,
+        radius: 0.02,
+      },
+      {
+        characterName: "Wenda",
+        centerX: 0.2921,
+        centerY: 0.9435,
+        radius: 0.015,
+      },
+      {
+        characterName: "Wizard",
+        centerX: 0.7365,
+        centerY: 0.8589,
+        radius: 0.015,
+      },
     ],
     scores: [],
   },
@@ -82,9 +140,12 @@ const images: SeedImage[] = [
     name: "Scene 6",
     url: "/images/scene-6.webp",
     characters: [
-      { characterName: "Waldo", centerX: 0.5, centerY: 0.5, radius: 0.05 },
-      { characterName: "Wizard", centerX: 0.5, centerY: 0.5, radius: 0.05 },
-      { characterName: "Odlaw", centerX: 0.5, centerY: 0.5, radius: 0.05 },
+      {
+        characterName: "Waldo",
+        centerX: 0.1661,
+        centerY: 0.8569,
+        radius: 0.03,
+      },
     ],
     scores: [],
   },
