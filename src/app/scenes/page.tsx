@@ -9,10 +9,7 @@ export default async function ScenesList() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10">
       {/* Page header */}
       <div className="mb-8">
-        <p
-          className="text-xs font-semibold uppercase mb-1"
-          style={{ color: "#6b7280", letterSpacing: "0.2em" }}
-        >
+        <p className="text-xs font-semibold uppercase mb-1 text-gray-500 tracking-[0.2em]">
           Choose a scene
         </p>
         <h1 className="font-bangers text-4xl text-white tracking-wide">
@@ -22,9 +19,7 @@ export default async function ScenesList() {
 
       {scenes.length === 0 ? (
         <div className="text-center py-24">
-          <p className="text-lg" style={{ color: "#6b7280" }}>
-            No scenes available yet.
-          </p>
+          <p className="text-lg text-gray-500">No scenes available yet.</p>
         </div>
       ) : (
         <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -32,17 +27,10 @@ export default async function ScenesList() {
             <li key={scene.id}>
               <Link
                 href={`/scenes/${scene.id}`}
-                className="group block rounded-2xl overflow-hidden transition-all duration-200"
-                style={{
-                  backgroundColor: "#111827",
-                  border: "1px solid #1f2937",
-                }}
+                className="group block rounded-2xl overflow-hidden transition-all duration-200 bg-gray-900 border border-gray-800"
               >
                 {/* Thumbnail */}
-                <div
-                  className="relative overflow-hidden"
-                  style={{ aspectRatio: "16/9", backgroundColor: "#1f2937" }}
-                >
+                <div className="relative overflow-hidden aspect-video bg-gray-800">
                   <Image
                     loading="eager"
                     className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105"
@@ -51,22 +39,11 @@ export default async function ScenesList() {
                     width={800}
                     height={450}
                   />
-                  {/* Subtle gradient overlay */}
-                  <div
-                    className="absolute inset-0 pointer-events-none"
-                    style={{
-                      background:
-                        "linear-gradient(to top, rgba(0,0,0,0.45) 0%, transparent 60%)",
-                    }}
-                  />
+                  {/* Gradient overlay */}
+                  <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(to_top,rgba(0,0,0,0.45)_0%,transparent_60%)]" />
                   {/* Play badge */}
-                  <div
-                    className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                  >
-                    <div
-                      className="rounded-full w-12 h-12 flex items-center justify-center"
-                      style={{ backgroundColor: "rgba(220,38,38,0.9)", backdropFilter: "blur(4px)" }}
-                    >
+                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                    <div className="rounded-full w-12 h-12 flex items-center justify-center bg-red-600/90 backdrop-blur-sm">
                       <svg
                         className="w-5 h-5 text-white"
                         fill="currentColor"
@@ -85,17 +62,16 @@ export default async function ScenesList() {
                     <p className="font-semibold text-sm text-white">
                       {scene.name}
                     </p>
-                    <p className="text-xs mt-0.5" style={{ color: "#6b7280" }}>
+                    <p className="text-xs mt-0.5 text-gray-500">
                       Find all hidden characters
                     </p>
                   </div>
                   <svg
-                    className="w-4 h-4 flex-shrink-0 transition-transform duration-150 group-hover:translate-x-0.5"
+                    className="w-4 h-4 flex-shrink-0 transition-transform duration-150 group-hover:translate-x-0.5 text-gray-600"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
                     strokeWidth={2}
-                    style={{ color: "#4b5563" }}
                     aria-hidden="true"
                   >
                     <path

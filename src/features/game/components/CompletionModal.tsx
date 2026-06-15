@@ -16,6 +16,35 @@ function formatTime(secs: number) {
   return `${s}s`;
 }
 
+const CONFETTI_COLORS = [
+  "#ef4444",
+  "#f97316",
+  "#eab308",
+  "#22c55e",
+  "#3b82f6",
+  "#a855f7",
+  "#ec4899",
+  "#fbbf24",
+];
+
+const CONFETTI_PIECES = Array.from({ length: 30 }, (_, i) => ({
+  id: i,
+  left: (i * 3.45) % 100,
+  color: CONFETTI_COLORS[i % CONFETTI_COLORS.length],
+  width: 5 + ((i * 3.1) % 7),
+  height: 7 + ((i * 2.9) % 9),
+  duration: 2.0 + ((i * 0.29) % 1.8),
+  delay: (i * 0.17) % 2.2,
+  rotation: (i * 43) % 360,
+  isCircle: i % 4 === 0,
+}));
+
+const STAR_DELAYS = [
+  "[animation-delay:0.1s]",
+  "[animation-delay:0.2s]",
+  "[animation-delay:0.3s]",
+];
+
 export function CompletionModal({
   isOpen,
   completionTime,
@@ -35,43 +64,44 @@ export function CompletionModal({
     onSubmit(trimmed);
   };
 
+  const canSubmit = name.trim() && !submitting;
+
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in"
+      className="fixed inset-0 z-100 h-full flex items-center justify-center p-4 animate-fade-in overflow-hidden bg-black/80 backdrop-blur-md"
       role="dialog"
       aria-modal="true"
       aria-labelledby="completion-title"
     >
-      {/* Backdrop */}
-      <div
-        className="absolute inset-0"
-        style={{ backgroundColor: "rgba(0,0,0,0.75)", backdropFilter: "blur(6px)" }}
-      />
+      {/* Confetti — dynamic values must stay inline */}
+      {CONFETTI_PIECES.map((p) => (
+        <span
+          key={p.id}
+          aria-hidden="true"
+          className="absolute top-0 pointer-events-none"
+          style={{
+            left: `${p.left}%`,
+            width: p.width,
+            height: p.isCircle ? p.width : p.height,
+            backgroundColor: p.color,
+            borderRadius: p.isCircle ? "50%" : "2px",
+            animation: `confetti-fall ${p.duration}s ${p.delay}s ease-in infinite`,
+            transform: `rotateZ(${p.rotation}deg)`,
+          }}
+        />
+      ))}
 
       {/* Card */}
-      <div
-        className="relative rounded-2xl p-8 w-full max-w-sm shadow-2xl animate-slide-up"
-        style={{
-          backgroundColor: "#111827",
-          border: "1px solid #374151",
-        }}
-      >
+      <div className="relative z-10 rounded-2xl p-8 w-full max-w-sm shadow-[0_0_40px_rgba(251,191,36,0.08),0_25px_50px_rgba(0,0,0,0.5)] animate-celebration-pop bg-slate-900 border border-amber-500/35">
         {/* Trophy icon */}
         <div className="text-center mb-6">
-          <div
-            className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
-            style={{
-              backgroundColor: "rgba(245,158,11,0.1)",
-              border: "2px solid rgba(245,158,11,0.3)",
-            }}
-          >
+          <div className="w-[4.5rem] h-[4.5rem] rounded-full flex items-center justify-center mx-auto mb-4 animate-trophy-pulse bg-amber-500/15 border-2 border-amber-500/50 shadow-[0_0_20px_rgba(245,158,11,0.15)]">
             <svg
-              className="w-8 h-8"
+              className="w-9 h-9 text-amber-400"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
               strokeWidth={1.5}
-              style={{ color: "#fbbf24" }}
               aria-hidden="true"
             >
               <path
@@ -88,23 +118,31 @@ export function CompletionModal({
           >
             You Found Them All!
           </h2>
-          <p className="text-sm mt-1" style={{ color: "#9ca3af" }}>
-            Completed in{" "}
-            <span
-              className="font-mono font-semibold"
-              style={{ color: "#fbbf24" }}
-            >
+          <div className="flex items-center justify-center gap-1 mt-1">
+            <span className="text-sm text-gray-400">Completed in</span>
+            <span className="font-mono font-bold text-base text-amber-400">
               {formatTime(completionTime)}
             </span>
-          </p>
+          </div>
+
+          {/* Star row */}
+          <div className="flex justify-center gap-1.5 mt-3" aria-hidden="true">
+            {[0, 1, 2].map((i) => (
+              <span
+                key={i}
+                className={`text-xl animate-bounce-in ${STAR_DELAYS[i]}`}
+              >
+                ⭐
+              </span>
+            ))}
+          </div>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label
               htmlFor="player-name"
-              className="block text-xs font-medium mb-1.5"
-              style={{ color: "#9ca3af" }}
+              className="block text-xs font-medium mb-1.5 text-gray-400"
             >
               Enter your name for the leaderboard
             </label>
@@ -115,25 +153,19 @@ export function CompletionModal({
               onChange={(e) => setName(e.target.value)}
               placeholder="Your name…"
               maxLength={30}
-              className="w-full rounded-lg px-4 py-2.5 text-sm text-white transition-colors"
-              style={{
-                backgroundColor: "#1f2937",
-                border: "1px solid #374151",
-                outline: "none",
-              }}
+              className="w-full rounded-lg px-4 py-2.5 text-sm text-white bg-slate-800 border border-slate-700 outline-none transition-colors"
               autoFocus
             />
           </div>
 
           <button
             type="submit"
-            disabled={!name.trim() || submitting}
-            className="w-full font-semibold py-2.5 rounded-lg text-white transition-colors"
-            style={{
-              backgroundColor: name.trim() && !submitting ? "#dc2626" : "#374151",
-              color: name.trim() && !submitting ? "#ffffff" : "#6b7280",
-              cursor: name.trim() && !submitting ? "pointer" : "not-allowed",
-            }}
+            disabled={!canSubmit}
+            className={`w-full font-semibold py-2.5 rounded-lg text-white transition-all ${
+              canSubmit
+                ? "bg-red-600 cursor-pointer shadow-[0_0_14px_rgba(220,38,38,0.3)]"
+                : "bg-gray-700 text-gray-500 cursor-not-allowed"
+            }`}
           >
             {submitting ? "Saving…" : "Submit Score"}
           </button>
@@ -141,8 +173,7 @@ export function CompletionModal({
           <button
             type="button"
             onClick={onSkip}
-            className="w-full text-sm py-1 transition-colors"
-            style={{ color: "#6b7280" }}
+            className="w-full text-sm py-1 transition-colors text-gray-500 hover:text-gray-400"
           >
             Skip — just go back
           </button>

@@ -14,13 +14,10 @@ export default async function SceneDetail({
   if (!scene) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-16 text-center">
-        <p className="text-lg" style={{ color: "#6b7280" }}>
-          Scene not found.
-        </p>
+        <p className="text-lg text-gray-500">Scene not found.</p>
         <Link
           href="/scenes"
-          className="mt-4 inline-block font-medium transition-colors"
-          style={{ color: "#f87171" }}
+          className="mt-4 inline-block font-medium transition-colors text-red-400 hover:text-red-300"
         >
           Back to scenes
         </Link>

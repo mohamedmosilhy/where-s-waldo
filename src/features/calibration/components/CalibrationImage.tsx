@@ -11,7 +11,7 @@ interface CalibrationImageProps {
   onClickImage: (x: number, y: number) => void;
 }
 
-// Colors for saved entry overlays (cycles through list)
+// Colors for saved entry overlays
 const ENTRY_COLORS = [
   "#ef4444", "#3b82f6", "#22c55e", "#f59e0b",
   "#a855f7", "#ec4899", "#14b8a6", "#f97316",
@@ -40,8 +40,7 @@ export function CalibrationImage({
   return (
     <div
       ref={containerRef}
-      className="relative cursor-crosshair select-none rounded-xl overflow-hidden"
-      style={{ border: "1px solid #374151" }}
+      className="relative cursor-crosshair select-none rounded-xl overflow-hidden border border-gray-700"
       onClick={handleClick}
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -52,12 +51,12 @@ export function CalibrationImage({
         draggable={false}
       />
 
-      {/* Saved entry overlays */}
+      {/* Saved entry overlays — positions/sizes/colors are all runtime-computed */}
       {savedEntries.map((entry, i) => {
         const color = ENTRY_COLORS[i % ENTRY_COLORS.length];
         return (
           <div key={entry.id}>
-            {/* Ellipse representing hitbox */}
+            {/* Hitbox ellipse */}
             <div
               className="absolute pointer-events-none rounded-full"
               style={{
@@ -72,25 +71,22 @@ export function CalibrationImage({
             />
             {/* Center dot */}
             <div
-              className="absolute pointer-events-none rounded-full"
+              className="absolute pointer-events-none rounded-full w-2 h-2"
               style={{
                 left: `${entry.centerX * 100}%`,
                 top: `${entry.centerY * 100}%`,
-                width: "8px",
-                height: "8px",
                 transform: "translate(-50%, -50%)",
                 backgroundColor: color,
               }}
             />
             {/* Label */}
             <div
-              className="absolute pointer-events-none px-1.5 py-0.5 rounded text-xs font-bold whitespace-nowrap"
+              className="absolute pointer-events-none px-1.5 py-0.5 rounded text-xs font-bold whitespace-nowrap text-white"
               style={{
                 left: `${entry.centerX * 100}%`,
                 top: `calc(${entry.centerY * 100}% - ${entry.radius * 100}% - 20px)`,
                 transform: "translateX(-50%)",
                 backgroundColor: color,
-                color: "#fff",
               }}
             >
               {entry.name}
@@ -99,55 +95,31 @@ export function CalibrationImage({
         );
       })}
 
-      {/* Pending point overlay */}
+      {/* Pending point overlay — position is runtime-computed */}
       {pendingPoint && (
         <>
           {/* Hitbox ellipse */}
           <div
-            className="absolute pointer-events-none rounded-full"
+            className="absolute pointer-events-none rounded-full border-2 border-dashed border-white bg-white/8"
             style={{
               left: `${pendingPoint.x * 100}%`,
               top: `${pendingPoint.y * 100}%`,
               width: `${pendingRadius * 2 * 100}%`,
               height: `${pendingRadius * 2 * 100}%`,
               transform: "translate(-50%, -50%)",
-              border: "2px dashed #ffffff",
-              backgroundColor: "rgba(255,255,255,0.08)",
             }}
           />
           {/* Crosshair */}
           <div
-            className="absolute pointer-events-none"
+            className="absolute pointer-events-none w-5 h-5"
             style={{
               left: `${pendingPoint.x * 100}%`,
               top: `${pendingPoint.y * 100}%`,
               transform: "translate(-50%, -50%)",
-              width: "20px",
-              height: "20px",
             }}
           >
-            <div
-              className="absolute"
-              style={{
-                top: "50%",
-                left: 0,
-                right: 0,
-                height: "2px",
-                background: "#fff",
-                marginTop: "-1px",
-              }}
-            />
-            <div
-              className="absolute"
-              style={{
-                left: "50%",
-                top: 0,
-                bottom: 0,
-                width: "2px",
-                background: "#fff",
-                marginLeft: "-1px",
-              }}
-            />
+            <div className="absolute inset-x-0 top-1/2 h-px bg-white -translate-y-1/2" />
+            <div className="absolute inset-y-0 left-1/2 w-px bg-white -translate-x-1/2" />
           </div>
         </>
       )}

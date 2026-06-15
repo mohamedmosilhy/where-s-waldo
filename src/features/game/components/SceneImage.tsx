@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { CharacterMenu } from "./CharacterMenu";
 import { CompletionModal } from "./CompletionModal";
+import { CelebrationScreen } from "./CelebrationScreen";
 import {
   validateCharacterSelection,
   setScore,
@@ -11,6 +12,11 @@ import { SceneImageProps } from "../types";
 import { useRouter } from "next/navigation";
 import { useGameStore } from "../game-store";
 import { getCharacterConfig } from "../character-config";
+import {
+  playSuccessSound,
+  playErrorSound,
+  playCelebrationSound,
+} from "../sounds";
 
 function formatTime(ms: number) {
   const secs = ms / 1000;
@@ -34,10 +40,14 @@ export function SceneImage({ scene }: SceneImageProps) {
     { id: string; x: number; y: number }[]
   >([]);
   const [notification, setNotification] = useState<{
+    key: number;
     text: string;
     success: boolean;
   } | null>(null);
+  const notifKeyRef = useRef(0);
   const [showCompletion, setShowCompletion] = useState(false);
+  const [showCelebration, setShowCelebration] = useState(false);
+  const [celebrationName, setCelebrationName] = useState("");
   const [completionTimeSecs, setCompletionTimeSecs] = useState(0);
 
   useEffect(() => {
@@ -60,12 +70,16 @@ export function SceneImage({ scene }: SceneImageProps) {
     };
   }, [setStartTimeOfScene]);
 
-  // Auto-clear notification
   useEffect(() => {
     if (!notification) return;
-    const t = setTimeout(() => setNotification(null), 2200);
+    const t = setTimeout(() => setNotification(null), 2400);
     return () => clearTimeout(t);
   }, [notification]);
+
+  const showNotif = (text: string, success: boolean) => {
+    notifKeyRef.current += 1;
+    setNotification({ key: notifKeyRef.current, text, success });
+  };
 
   const handleCharacterSelect = async (character: {
     id: string;
@@ -80,33 +94,39 @@ export function SceneImage({ scene }: SceneImageProps) {
     );
 
     if (result.success) {
+      playSuccessSound();
       const updated = [...foundCharacters, character.id];
       setFoundCharacters(updated);
       setFoundPositions((prev) => [
         ...prev,
         { id: character.id, x: coords.x, y: coords.y },
       ]);
-      setNotification({ text: `Found ${character.name}!`, success: true });
+      showNotif(`Found ${character.name}!`, true);
 
       if (updated.length === scene.characters.length) {
         const completionSecs =
           (Date.now() - useGameStore.getState().startTimeOfScene) / 1000;
         setCompletionTimeSecs(completionSecs);
 
-        const storedName = useGameStore.getState().playerName;
-        if (storedName) {
-          await setScore({
-            playerName: storedName,
-            completionTime: completionSecs * 1000,
-            imageId: scene.id,
-          });
-          router.push("/scenes");
-        } else {
-          setShowCompletion(true);
-        }
+        setTimeout(() => {
+          playCelebrationSound();
+          const storedName = useGameStore.getState().playerName;
+          if (storedName) {
+            setScore({
+              playerName: storedName,
+              completionTime: completionSecs * 1000,
+              imageId: scene.id,
+            });
+            setCelebrationName(storedName);
+            setShowCelebration(true);
+          } else {
+            setShowCompletion(true);
+          }
+        }, 600);
       }
     } else {
-      setNotification({ text: "Not quite — keep looking!", success: false });
+      playErrorSound();
+      showNotif("Not quite — keep looking!", false);
     }
   };
 
@@ -117,7 +137,9 @@ export function SceneImage({ scene }: SceneImageProps) {
       imageId: scene.id,
     });
     setPlayerName(playerName);
-    router.push("/scenes");
+    setShowCompletion(false);
+    setCelebrationName(playerName);
+    setShowCelebration(true);
   };
 
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -132,18 +154,23 @@ export function SceneImage({ scene }: SceneImageProps) {
 
   return (
     <>
+      {showCelebration && (
+        <CelebrationScreen
+          playerName={celebrationName}
+          completionTime={completionTimeSecs}
+          onDone={() => router.push("/scenes")}
+        />
+      )}
+
       <CompletionModal
-        isOpen={showCompletion}
+        isOpen={showCompletion && !showCelebration}
         completionTime={completionTimeSecs}
         onSubmit={handleCompletionSubmit}
         onSkip={() => router.push("/scenes")}
       />
 
       {/* HUD bar */}
-      <div
-        className="flex items-center justify-between rounded-xl px-3 sm:px-4 py-2.5 mb-4 gap-2"
-        style={{ backgroundColor: "#111827", border: "1px solid #1f2937" }}
-      >
+      <div className="flex items-center justify-between rounded-xl px-3 sm:px-4 py-2.5 mb-4 gap-2 bg-gray-900 border border-gray-800">
         <h1 className="font-bangers text-lg sm:text-xl text-white tracking-wide truncate min-w-0">
           {scene.name}
         </h1>
@@ -151,44 +178,32 @@ export function SceneImage({ scene }: SceneImageProps) {
         <div className="flex items-center gap-2 sm:gap-4 shrink-0">
           {/* Progress */}
           <div className="flex items-center gap-1.5">
-            <div
-              className="h-1.5 w-14 sm:w-20 rounded-full overflow-hidden"
-              style={{ backgroundColor: "#1f2937" }}
-            >
+            <div className="h-1.5 w-14 sm:w-20 rounded-full overflow-hidden bg-gray-800">
+              {/* width is runtime-computed — must stay inline */}
               <div
-                className="h-full rounded-full transition-all duration-500"
-                style={{
-                  width: `${(progress / total) * 100}%`,
-                  backgroundColor: "#10b981",
-                }}
+                className="h-full rounded-full transition-all duration-500 bg-emerald-500"
+                style={{ width: `${(progress / total) * 100}%` }}
               />
             </div>
-            <span className="text-xs font-mono" style={{ color: "#9ca3af" }}>
+            <span className="text-xs font-mono text-gray-400">
               {progress}/{total}
             </span>
           </div>
 
           {/* Timer */}
-          <div
-            className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 rounded-lg"
-            style={{ backgroundColor: "#1f2937" }}
-          >
+          <div className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 rounded-lg bg-gray-800">
             <svg
-              className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0"
+              className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0 text-amber-400"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
               strokeWidth={2.5}
-              style={{ color: "#fbbf24" }}
               aria-hidden="true"
             >
               <circle cx="12" cy="12" r="9" />
               <path strokeLinecap="round" d="M12 7v5l3 1.5" />
             </svg>
-            <span
-              className="font-mono text-xs sm:text-sm font-semibold"
-              style={{ color: "#fbbf24", minWidth: "3rem" }}
-            >
+            <span className="font-mono text-xs sm:text-sm font-semibold text-amber-400 min-w-12">
               {formatTime(timer)}
             </span>
           </div>
@@ -202,21 +217,16 @@ export function SceneImage({ scene }: SceneImageProps) {
           {/* Notification toast */}
           {notification && (
             <div
-              key={notification.text}
-              className="mb-2 px-4 py-2 rounded-lg text-sm font-medium text-center animate-slide-up"
-              style={{
-                backgroundColor: notification.success
-                  ? "rgba(16,185,129,0.15)"
-                  : "rgba(239,68,68,0.15)",
-                border: `1px solid ${
-                  notification.success
-                    ? "rgba(16,185,129,0.3)"
-                    : "rgba(239,68,68,0.3)"
-                }`,
-                color: notification.success ? "#34d399" : "#f87171",
-              }}
+              key={notification.key}
+              className={`mb-2 px-4 py-2 rounded-lg text-sm font-medium text-center ${
+                notification.success
+                  ? "animate-slide-up bg-emerald-500/15 border border-emerald-500/30 text-emerald-400"
+                  : "animate-slide-shake bg-red-500/15 border border-red-500/30 text-red-400"
+              }`}
               role="status"
+              aria-live="polite"
             >
+              <span className="mr-1.5">{notification.success ? "✓" : "✗"}</span>
               {notification.text}
             </div>
           )}
@@ -224,8 +234,7 @@ export function SceneImage({ scene }: SceneImageProps) {
           {/* Image wrapper */}
           <div
             ref={imageWrapperRef}
-            className="relative cursor-crosshair select-none rounded-xl overflow-hidden"
-            style={{ border: "1px solid #1f2937" }}
+            className="relative cursor-crosshair select-none rounded-xl overflow-hidden border border-gray-800"
             onClick={handleClick}
           >
             <Image
@@ -237,50 +246,35 @@ export function SceneImage({ scene }: SceneImageProps) {
               width={1200}
             />
 
-            {/* Click crosshair */}
+            {/* Click crosshair — left/top are runtime-computed */}
             {showMenu && (
               <span
-                className="absolute rounded-full pointer-events-none"
+                className="absolute w-5 h-5 rounded-full pointer-events-none border-2 border-red-500 shadow-[0_0_0_2px_rgba(239,68,68,0.3)]"
                 style={{
-                  width: "1.25rem",
-                  height: "1.25rem",
-                  border: "2px solid #ef4444",
                   left: `${coords.x * 100}%`,
                   top: `${coords.y * 100}%`,
                   transform: "translate(-50%, -50%)",
-                  boxShadow: "0 0 0 2px rgba(239,68,68,0.3)",
                 }}
               >
-                <span
-                  className="absolute inset-0 rounded-full animate-ping"
-                  style={{
-                    border: "2px solid #ef4444",
-                    opacity: 0.6,
-                  }}
-                />
+                <span className="absolute inset-0 rounded-full animate-ping border-2 border-red-500 opacity-60" />
               </span>
             )}
 
-            {/* Found character markers */}
+            {/* Found character markers — left/top are runtime-computed */}
             {foundPositions.map((pos) => (
               <span
                 key={pos.id}
-                className="absolute rounded-full pointer-events-none flex items-center justify-center animate-found-pop"
+                className="absolute w-8 h-8 rounded-full pointer-events-none flex items-center justify-center animate-found-pop border-2 border-emerald-500 bg-emerald-500/20"
                 style={{
-                  width: "2rem",
-                  height: "2rem",
-                  border: "2px solid #10b981",
-                  backgroundColor: "rgba(16,185,129,0.2)",
                   left: `${pos.x * 100}%`,
                   top: `${pos.y * 100}%`,
                   transform: "translate(-50%, -50%)",
                 }}
               >
                 <svg
-                  className="w-3 h-3"
+                  className="w-3 h-3 text-emerald-400"
                   fill="currentColor"
                   viewBox="0 0 20 20"
-                  style={{ color: "#34d399" }}
                   aria-hidden="true"
                 >
                   <path
@@ -304,17 +298,11 @@ export function SceneImage({ scene }: SceneImageProps) {
           </div>
         </div>
 
-        {/* Character sidebar — horizontal strip on mobile, vertical on desktop */}
+        {/* Character sidebar */}
         <div className="w-full lg:w-52 lg:shrink-0">
-          {/* Mobile: horizontal scrollable avatar strip */}
-          <div
-            className="lg:hidden rounded-xl px-3 py-2"
-            style={{ backgroundColor: "#111827", border: "1px solid #1f2937" }}
-          >
-            <p
-              className="text-xs font-semibold uppercase tracking-wider mb-2"
-              style={{ color: "#6b7280" }}
-            >
+          {/* Mobile: horizontal strip */}
+          <div className="lg:hidden rounded-xl px-3 py-2 bg-gray-900 border border-gray-800">
+            <p className="text-xs font-semibold uppercase tracking-wider mb-2 text-gray-500">
               Find These
             </p>
             <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
@@ -324,18 +312,11 @@ export function SceneImage({ scene }: SceneImageProps) {
                 return (
                   <div
                     key={ic.character.id}
-                    className="flex flex-col items-center gap-1 shrink-0 transition-all duration-300"
-                    style={{ opacity: found ? 0.55 : 1 }}
+                    className={`flex flex-col items-center gap-1 shrink-0 transition-all duration-300 ${found ? "opacity-55" : ""}`}
                   >
                     <div
-                      className="w-12 h-12 rounded-full relative overflow-hidden"
-                      style={{
-                        backgroundColor: cfg.bgColor,
-                        filter: found ? "grayscale(0.5)" : "none",
-                        border: found
-                          ? "2px solid #10b981"
-                          : "2px solid transparent",
-                      }}
+                      className={`w-12 h-12 rounded-full relative overflow-hidden ${found ? "grayscale-[0.5] border-2 border-emerald-500" : "border-2 border-transparent"}`}
+                      style={{ backgroundColor: cfg.bgColor }}
                     >
                       {cfg.imageUrl && (
                         <Image
@@ -347,15 +328,11 @@ export function SceneImage({ scene }: SceneImageProps) {
                         />
                       )}
                       {found && (
-                        <div
-                          className="absolute inset-0 flex items-center justify-center rounded-full"
-                          style={{ backgroundColor: "rgba(16,185,129,0.45)" }}
-                        >
+                        <div className="absolute inset-0 flex items-center justify-center rounded-full bg-emerald-500/45">
                           <svg
-                            className="w-5 h-5"
+                            className="w-5 h-5 text-white"
                             fill="currentColor"
                             viewBox="0 0 20 20"
-                            style={{ color: "#fff" }}
                             aria-hidden="true"
                           >
                             <path
@@ -368,8 +345,7 @@ export function SceneImage({ scene }: SceneImageProps) {
                       )}
                     </div>
                     <span
-                      className="text-xs font-medium"
-                      style={{ color: found ? "#34d399" : "#9ca3af" }}
+                      className={`text-xs font-medium ${found ? "text-emerald-400" : "text-gray-400"}`}
                     >
                       {ic.character.name}
                     </span>
@@ -380,14 +356,8 @@ export function SceneImage({ scene }: SceneImageProps) {
           </div>
 
           {/* Desktop: vertical list */}
-          <div
-            className="hidden lg:block rounded-xl p-4"
-            style={{ backgroundColor: "#111827", border: "1px solid #1f2937" }}
-          >
-            <h3
-              className="text-xs font-semibold uppercase tracking-wider mb-3"
-              style={{ color: "#6b7280", letterSpacing: "0.1em" }}
-            >
+          <div className="hidden lg:block rounded-xl p-4 bg-gray-900 border border-gray-800">
+            <h3 className="text-xs font-semibold uppercase tracking-widest mb-3 text-gray-500">
               Find These
             </h3>
             <ul className="space-y-2">
@@ -397,21 +367,15 @@ export function SceneImage({ scene }: SceneImageProps) {
                 return (
                   <li
                     key={ic.character.id}
-                    className="flex items-center gap-3 p-2 rounded-lg transition-all duration-300"
-                    style={{
-                      backgroundColor: found
-                        ? "rgba(16,185,129,0.08)"
-                        : "rgba(31,41,55,0.5)",
-                      border: `1px solid ${found ? "rgba(16,185,129,0.25)" : "transparent"}`,
-                      opacity: found ? 0.7 : 1,
-                    }}
+                    className={`flex items-center gap-3 p-2 rounded-lg transition-all duration-300 border ${
+                      found
+                        ? "bg-emerald-500/8 border-emerald-500/25 opacity-70"
+                        : "bg-gray-800/50 border-transparent"
+                    }`}
                   >
                     <div
-                      className="w-9 h-9 rounded-full shrink-0 relative overflow-hidden"
-                      style={{
-                        backgroundColor: cfg.bgColor,
-                        filter: found ? "grayscale(0.5)" : "none",
-                      }}
+                      className={`w-9 h-9 rounded-full shrink-0 relative overflow-hidden ${found ? "grayscale-[0.5]" : ""}`}
+                      style={{ backgroundColor: cfg.bgColor }}
                     >
                       {cfg.imageUrl && (
                         <Image
@@ -423,13 +387,7 @@ export function SceneImage({ scene }: SceneImageProps) {
                         />
                       )}
                       {found && (
-                        <div
-                          className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full flex items-center justify-center"
-                          style={{
-                            backgroundColor: "#10b981",
-                            border: "2px solid #030712",
-                          }}
-                        >
+                        <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full flex items-center justify-center bg-emerald-500 border-2 border-gray-950">
                           <svg
                             className="w-2 h-2 text-white"
                             fill="currentColor"
@@ -447,15 +405,11 @@ export function SceneImage({ scene }: SceneImageProps) {
                     </div>
                     <div>
                       <p
-                        className="text-sm font-medium leading-tight"
-                        style={{
-                          color: found ? "#34d399" : "#e5e7eb",
-                          textDecoration: found ? "line-through" : "none",
-                        }}
+                        className={`text-sm font-medium leading-tight ${found ? "text-emerald-400 line-through" : "text-gray-200"}`}
                       >
                         {ic.character.name}
                       </p>
-                      <p className="text-xs" style={{ color: "#6b7280" }}>
+                      <p className="text-xs text-gray-500">
                         {found ? "Found!" : "Still hiding…"}
                       </p>
                     </div>

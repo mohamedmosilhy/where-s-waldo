@@ -11,7 +11,7 @@ export function CharacterMenu({
 }: CharacterMenuProps) {
   const stopProp = (e: React.MouseEvent) => e.stopPropagation();
 
-  // Desktop: keep popup inside image bounds
+  // Keep inside image bounds on desktop
   const leftPct = Math.min(position.x * 100 + 1, 58);
   const topPct = Math.min(position.y * 100 + 3, 65);
 
@@ -24,29 +24,14 @@ export function CharacterMenu({
         className="lg:hidden fixed bottom-0 left-0 right-0 z-40 animate-slide-up"
         onClick={stopProp}
       >
-        {/* Backdrop strip (tap outside to close is handled by document listener) */}
-        <div
-          className="rounded-t-2xl overflow-hidden"
-          style={{
-            backgroundColor: "#111827",
-            border: "1px solid #374151",
-            borderBottom: "none",
-            boxShadow: "0 -8px 40px rgba(0,0,0,0.7)",
-          }}
-        >
+        <div className="rounded-t-2xl overflow-hidden bg-gray-900 border border-gray-700 border-b-0 shadow-[0_-8px_40px_rgba(0,0,0,0.7)]">
           {/* Drag handle */}
           <div className="flex justify-center pt-3 pb-1">
-            <div
-              className="w-8 h-1 rounded-full"
-              style={{ backgroundColor: "#374151" }}
-            />
+            <div className="w-8 h-1 rounded-full bg-gray-700" />
           </div>
 
           <div className="px-4 py-3">
-            <p
-              className="text-xs font-semibold uppercase tracking-wider mb-3"
-              style={{ color: "#6b7280" }}
-            >
+            <p className="text-xs font-semibold uppercase tracking-wider mb-3 text-gray-500">
               Who did you find?
             </p>
 
@@ -57,13 +42,7 @@ export function CharacterMenu({
                   <button
                     key={character.id}
                     onClick={() => onCharacterSelect(character)}
-                    className="flex items-center gap-3 rounded-xl text-left transition-colors active:scale-95"
-                    style={{
-                      backgroundColor: "#1f2937",
-                      border: "1px solid #374151",
-                      padding: "10px 12px",
-                      minHeight: "56px",
-                    }}
+                    className="flex items-center gap-3 rounded-xl text-left transition-colors active:scale-95 bg-gray-800 border border-gray-700 px-3 py-2.5 min-h-[56px]"
                   >
                     <div
                       className="w-10 h-10 rounded-full shrink-0 overflow-hidden"
@@ -90,29 +69,15 @@ export function CharacterMenu({
         </div>
       </div>
 
-      {/* ── Desktop: floating popup ── */}
+      {/* ── Desktop: floating popup — left/top are runtime-computed ── */}
       <div
         className="hidden lg:block absolute z-20 animate-slide-up"
         onClick={stopProp}
         style={{ left: `${leftPct}%`, top: `${topPct}%` }}
       >
-        <div
-          className="rounded-xl shadow-2xl overflow-hidden w-48"
-          style={{
-            backgroundColor: "rgba(17,24,39,0.97)",
-            border: "1px solid #374151",
-            backdropFilter: "blur(8px)",
-            boxShadow: "0 20px 40px rgba(0,0,0,0.6)",
-          }}
-        >
-          <div
-            className="px-3 py-2"
-            style={{ borderBottom: "1px solid #1f2937" }}
-          >
-            <p
-              className="text-xs font-semibold uppercase tracking-wider"
-              style={{ color: "#6b7280" }}
-            >
+        <div className="rounded-xl shadow-2xl overflow-hidden w-48 bg-gray-900/[0.97] border border-gray-700 backdrop-blur-md shadow-[0_20px_40px_rgba(0,0,0,0.6)]">
+          <div className="px-3 py-2 border-b border-gray-800">
+            <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">
               Who did you find?
             </p>
           </div>
@@ -124,16 +89,7 @@ export function CharacterMenu({
                 <li key={character.id}>
                   <button
                     onClick={() => onCharacterSelect(character)}
-                    className="w-full flex items-center gap-2.5 px-2 py-1.5 rounded-lg transition-colors duration-100 text-left"
-                    style={{ color: "#e5e7eb" }}
-                    onMouseEnter={(e) => {
-                      (e.currentTarget as HTMLButtonElement).style.backgroundColor =
-                        "rgba(220,38,38,0.15)";
-                    }}
-                    onMouseLeave={(e) => {
-                      (e.currentTarget as HTMLButtonElement).style.backgroundColor =
-                        "transparent";
-                    }}
+                    className="w-full flex items-center gap-2.5 px-2 py-1.5 rounded-lg transition-colors duration-100 text-left text-gray-200 hover:bg-red-600/15"
                   >
                     <div
                       className="w-8 h-8 rounded-full shrink-0 overflow-hidden"

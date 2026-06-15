@@ -34,12 +34,11 @@ function CopyButton({ text, label }: { text: string; label: string }) {
   return (
     <button
       onClick={copy}
-      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
-      style={{
-        backgroundColor: copied ? "rgba(16,185,129,0.15)" : "#1f2937",
-        color: copied ? "#34d399" : "#9ca3af",
-        border: `1px solid ${copied ? "rgba(16,185,129,0.3)" : "#374151"}`,
-      }}
+      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border ${
+        copied
+          ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30"
+          : "bg-gray-800 text-gray-400 border-gray-700 hover:text-gray-200"
+      }`}
     >
       {copied ? (
         <>
@@ -68,13 +67,8 @@ const ENTRY_COLORS = [
 export function ExportPanel({ entries, onRemove, onClear }: ExportPanelProps) {
   if (entries.length === 0) {
     return (
-      <div
-        className="rounded-xl p-5 text-center"
-        style={{ backgroundColor: "#111827", border: "1px solid #1f2937" }}
-      >
-        <p className="text-sm" style={{ color: "#4b5563" }}>
-          No characters calibrated yet.
-        </p>
+      <div className="rounded-xl p-5 text-center bg-gray-900 border border-gray-800">
+        <p className="text-sm text-gray-600">No characters calibrated yet.</p>
       </div>
     );
   }
@@ -82,36 +76,25 @@ export function ExportPanel({ entries, onRemove, onClear }: ExportPanelProps) {
   return (
     <div className="space-y-4">
       {/* Individual entries */}
-      <div
-        className="rounded-xl overflow-hidden"
-        style={{ border: "1px solid #1f2937" }}
-      >
-        <div
-          className="flex items-center justify-between px-4 py-3"
-          style={{ backgroundColor: "#111827", borderBottom: "1px solid #1f2937" }}
-        >
+      <div className="rounded-xl overflow-hidden border border-gray-800">
+        <div className="flex items-center justify-between px-4 py-3 bg-gray-900 border-b border-gray-800">
           <h3 className="font-semibold text-white text-sm">
             Saved Characters ({entries.length})
           </h3>
           <button
             onClick={onClear}
-            className="text-xs transition-colors"
-            style={{ color: "#6b7280" }}
+            className="text-xs transition-colors text-gray-500 hover:text-gray-300"
           >
             Clear all
           </button>
         </div>
 
-        <div style={{ backgroundColor: "#0f172a" }}>
+        <div className="bg-slate-900 divide-y divide-gray-800">
           {entries.map((entry, i) => {
             const color = ENTRY_COLORS[i % ENTRY_COLORS.length];
             return (
-              <div
-                key={entry.id}
-                className="flex items-start gap-3 px-4 py-3"
-                style={{ borderBottom: i < entries.length - 1 ? "1px solid #1f2937" : "none" }}
-              >
-                {/* Color swatch */}
+              <div key={entry.id} className="flex items-start gap-3 px-4 py-3">
+                {/* Color swatch — dynamic from ENTRY_COLORS */}
                 <div
                   className="w-3 h-3 rounded-full flex-shrink-0 mt-1"
                   style={{ backgroundColor: color }}
@@ -121,10 +104,7 @@ export function ExportPanel({ entries, onRemove, onClear }: ExportPanelProps) {
                   <p className="font-semibold text-sm text-white mb-1">
                     {entry.name}
                   </p>
-                  <pre
-                    className="text-xs leading-relaxed"
-                    style={{ color: "#9ca3af", fontFamily: "monospace" }}
-                  >
+                  <pre className="text-xs leading-relaxed text-gray-400 font-mono">
 {`centerX: ${entry.centerX.toFixed(4)}
 centerY: ${entry.centerY.toFixed(4)}
 radius:  ${entry.radius.toFixed(4)}`}
@@ -135,8 +115,7 @@ radius:  ${entry.radius.toFixed(4)}`}
                   <CopyButton text={formatEntry(entry)} label="Copy" />
                   <button
                     onClick={() => onRemove(entry.id)}
-                    className="w-6 h-6 flex items-center justify-center rounded transition-colors"
-                    style={{ color: "#6b7280" }}
+                    className="w-6 h-6 flex items-center justify-center rounded transition-colors text-gray-500 hover:text-gray-300"
                     aria-label={`Remove ${entry.name}`}
                   >
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
@@ -151,35 +130,18 @@ radius:  ${entry.radius.toFixed(4)}`}
       </div>
 
       {/* Full array export */}
-      <div
-        className="rounded-xl overflow-hidden"
-        style={{ border: "1px solid #1f2937" }}
-      >
-        <div
-          className="flex items-center justify-between px-4 py-3"
-          style={{ backgroundColor: "#111827", borderBottom: "1px solid #1f2937" }}
-        >
+      <div className="rounded-xl overflow-hidden border border-gray-800">
+        <div className="flex items-center justify-between px-4 py-3 bg-gray-900 border-b border-gray-800">
           <h3 className="font-semibold text-white text-sm">
             Seed Array — paste into{" "}
-            <code
-              className="px-1.5 py-0.5 rounded text-xs"
-              style={{ backgroundColor: "#1f2937", color: "#fbbf24" }}
-            >
+            <code className="px-1.5 py-0.5 rounded text-xs bg-gray-800 text-amber-400">
               prisma/seed.ts
             </code>
           </h3>
           <CopyButton text={formatArray(entries)} label="Copy all" />
         </div>
 
-        <pre
-          className="p-4 overflow-x-auto text-xs leading-relaxed"
-          style={{
-            backgroundColor: "#030712",
-            color: "#a5f3fc",
-            fontFamily: "monospace",
-            maxHeight: "320px",
-          }}
-        >
+        <pre className="p-4 overflow-x-auto text-xs leading-relaxed max-h-80 bg-gray-950 text-cyan-200 font-mono">
           {formatArray(entries)}
         </pre>
       </div>

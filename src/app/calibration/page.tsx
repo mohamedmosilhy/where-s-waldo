@@ -53,22 +53,16 @@ export default function CalibrationPage() {
       {/* Page header */}
       <div className="mb-6">
         <div className="flex items-center gap-2 mb-1">
-          <span
-            className="px-2 py-0.5 rounded text-xs font-bold uppercase tracking-wider"
-            style={{ backgroundColor: "rgba(234,179,8,0.15)", color: "#ca8a04" }}
-          >
+          <span className="px-2 py-0.5 rounded text-xs font-bold uppercase tracking-wider bg-yellow-500/15 text-yellow-600">
             Dev Tool
           </span>
         </div>
         <h1 className="font-bangers text-4xl text-white tracking-wide">
           Scene Calibration
         </h1>
-        <p className="mt-1 text-sm" style={{ color: "#6b7280" }}>
+        <p className="mt-1 text-sm text-gray-500">
           Click on a scene image to generate{" "}
-          <code
-            className="px-1 py-0.5 rounded text-xs"
-            style={{ backgroundColor: "#1f2937", color: "#fbbf24" }}
-          >
+          <code className="px-1 py-0.5 rounded text-xs bg-gray-800 text-amber-400">
             centerX / centerY / radius
           </code>{" "}
           values for your Prisma seed file.
@@ -88,8 +82,7 @@ export default function CalibrationPage() {
         {!imageUrl ? (
           <button
             onClick={() => fileInputRef.current?.click()}
-            className="w-full rounded-xl border-2 border-dashed py-16 flex flex-col items-center gap-3 transition-colors"
-            style={{ borderColor: "#374151", color: "#6b7280" }}
+            className="w-full rounded-xl border-2 border-dashed border-gray-700 text-gray-500 py-16 flex flex-col items-center gap-3 transition-colors hover:border-gray-600 hover:text-gray-400"
           >
             <svg
               className="w-10 h-10"
@@ -114,19 +107,17 @@ export default function CalibrationPage() {
           <div className="flex items-center gap-3">
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-              style={{ backgroundColor: "#1f2937", color: "#9ca3af", border: "1px solid #374151" }}
+              className="px-4 py-2 rounded-lg text-sm font-medium transition-colors bg-gray-800 text-gray-400 border border-gray-700 hover:text-gray-200"
             >
               Change image
             </button>
             <button
               onClick={() => { setImageUrl(null); setPendingPoint(null); setEntries([]); }}
-              className="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-              style={{ backgroundColor: "rgba(239,68,68,0.1)", color: "#f87171", border: "1px solid rgba(239,68,68,0.2)" }}
+              className="px-4 py-2 rounded-lg text-sm font-medium transition-colors bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/15"
             >
               Clear
             </button>
-            <span className="text-xs" style={{ color: "#4b5563" }}>
+            <span className="text-xs text-gray-600">
               {entries.length} character{entries.length !== 1 ? "s" : ""} calibrated
             </span>
           </div>
@@ -146,10 +137,7 @@ export default function CalibrationPage() {
             />
 
             {/* Instructions */}
-            <div
-              className="rounded-lg px-4 py-3 text-xs leading-relaxed"
-              style={{ backgroundColor: "#111827", color: "#6b7280" }}
-            >
+            <div className="rounded-lg px-4 py-3 text-xs leading-relaxed bg-gray-900 text-gray-500">
               <strong className="text-white">How to use: </strong>
               Click the center of the character on the image → adjust the radius
               slider until the dashed circle covers the character → enter a name
