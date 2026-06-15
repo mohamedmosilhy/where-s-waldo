@@ -48,6 +48,46 @@ const images: SeedImage[] = [
     ],
     scores: [],
   },
+  {
+    name: "Scene 3",
+    url: "/images/scene-3.webp",
+    characters: [
+      { characterName: "Waldo", centerX: 0.5, centerY: 0.5, radius: 0.05 },
+      { characterName: "Wizard", centerX: 0.5, centerY: 0.5, radius: 0.05 },
+      { characterName: "Odlaw", centerX: 0.5, centerY: 0.5, radius: 0.05 },
+    ],
+    scores: [],
+  },
+  {
+    name: "Scene 4",
+    url: "/images/scene-4.webp",
+    characters: [
+      { characterName: "Waldo", centerX: 0.5, centerY: 0.5, radius: 0.05 },
+      { characterName: "Wizard", centerX: 0.5, centerY: 0.5, radius: 0.05 },
+      { characterName: "Odlaw", centerX: 0.5, centerY: 0.5, radius: 0.05 },
+    ],
+    scores: [],
+  },
+  {
+    name: "Scene 5",
+    url: "/images/scene-5.webp",
+    characters: [
+      { characterName: "Waldo", centerX: 0.5, centerY: 0.5, radius: 0.05 },
+      { characterName: "Wizard", centerX: 0.5, centerY: 0.5, radius: 0.05 },
+      { characterName: "Odlaw", centerX: 0.5, centerY: 0.5, radius: 0.05 },
+    ],
+    scores: [],
+  },
+  {
+    name: "Scene 6",
+    url: "/images/scene-6.webp",
+    characters: [
+      { characterName: "Waldo", centerX: 0.5, centerY: 0.5, radius: 0.05 },
+      { characterName: "Wizard", centerX: 0.5, centerY: 0.5, radius: 0.05 },
+      { characterName: "Odlaw", centerX: 0.5, centerY: 0.5, radius: 0.05 },
+    ],
+    scores: [],
+  },
 ];
 
 async function main() {
